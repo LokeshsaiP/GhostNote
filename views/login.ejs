@@ -1,0 +1,34 @@
+<!DOCTYPE html>
+<html lang="en">
+  <head>
+    <meta charset="UTF-8" />
+    <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+    <script src="https://cdn.jsdelivr.net/npm/@tailwindcss/browser@4"></script>
+    <title>Login</title>
+  </head>
+  <body class="bg-[#323232]">
+    <div
+      class="w-96 h-64 bg-[#ddd0c8] rounded-lg text-[#323232] flex flex-col items-center justify-center mx-auto mt-20 p-4"
+    >
+      <h2>Log In</h2>
+      <form action="/login" method="post">
+        <input
+          type="text"
+          name="username"
+          placeholder="Username"
+          required
+        /><br />
+        <input
+          type="password"
+          name="password"
+          placeholder="Password"
+          required
+        /><br />
+        <input class="cursor-pointer" type="submit" value="Login" /><br />
+      </form>
+      <a href="/signup">Don't have an account?SignUP</a>
+    </div>
+  </body>
+</html>
+<!-- #ddd0c8 light
+#323232 dark -->

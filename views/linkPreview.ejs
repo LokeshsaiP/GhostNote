@@ -1,0 +1,23 @@
+<!DOCTYPE html>
+<html lang="en">
+  <head>
+    <meta charset="UTF-8" />
+    <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+    <title>secret</title>
+  </head>
+  <body>
+    <% if(locals.link){ %>
+    <h2>Here's your link</h2>
+    <br />
+    <a href="<%= link %>"><%= link %></a><br />
+    <p>
+      Copy this link and send it to the person you want to share the secret
+      with.
+    </p>
+    <br />
+    <%} else { %>
+    <h2>Sorry, we couldn't generate a link for you.</h2>
+    <br />
+    <%} %>
+  </body>
+</html>

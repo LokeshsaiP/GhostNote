@@ -1,0 +1,73 @@
+<!DOCTYPE html>
+<html lang="en">
+  <head>
+    <meta charset="UTF-8" />
+    <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+    <script src="https://cdn.jsdelivr.net/npm/@tailwindcss/browser@4"></script>
+    <title>Main page</title>
+  </head>
+  <body>
+    <!-- Nav bar -->
+    <div class="bg-[#ddd0c8]">
+      <nav
+        class="container mx-auto px-4 py-2 flex justify-between items-center"
+      >
+        <a href="#" class="text-[#323232] text-lg font-bold">GhostNote</a>
+        <ul class="flex space-x-4">
+          <li><a href="#" class="text-[#323232] hover:text-white">Home</a></li>
+          <li><a href="#" class="text-[#323232] hover:text-white">About</a></li>
+          <li>
+            <a href="#" class="text-[#323232] hover:text-white">Services</a>
+          </li>
+          <li>
+            <a href="/login" class="text-[#323232] hover:text-white">Login</a>
+          </li>
+        </ul>
+      </nav>
+    </div>
+    <!-- Nav bar end -->
+    <!-- Main content -->
+    <div class="container h-full bg-[#323232] mx-auto px-4 py-8">
+      <!-- Welcome  -->
+      <div class="flex flex-col justify-center items-center h-full">
+        <% if(locals.user){ %>
+        <h1 class="text-[#ddd0c8] text-3xl font-bold mb-4">
+          Welcome <%= user %>
+        </h1>
+        <% } else { %>
+        <h1 class="text-[#ddd0c8] text-3xl font-bold mb-4">
+          Welcome to GhostNote
+        </h1>
+        <% } %>
+        <p class="text-[#ddd0c8] mb-4 text-center">
+          Paste any secret message that you want to send.
+        </p>
+        <span class="text-[#ddd0c8] italic font-bold"
+          >Keep your sensitive data secure</span
+        >
+      </div>
+      <!-- from -->
+      <div>
+        <form
+          action="/encrypt"
+          method="post"
+          class="flex flex-col items-center my-8 p-6"
+        >
+          <textarea
+            class="max-h-[400px] min-h-24 resize-none overflow-y-auto text-[#ddd0c8]"
+            id="secret"
+            name="secret"
+            placeholder="Enter your secret"
+          >
+          </textarea
+          ><br />
+          <input
+            class="cursor-pointer text-[#ddd0c8]"
+            type="submit"
+            value="Generate Link"
+          />
+        </form>
+      </div>
+    </div>
+  </body>
+</html>

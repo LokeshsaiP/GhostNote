@@ -1,0 +1,26 @@
+<!DOCTYPE html>
+<html lang="en">
+  <head>
+    <meta charset="UTF-8" />
+    <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+    <script src="https://cdn.jsdelivr.net/npm/@tailwindcss/browser@4"></script>
+    <title>signup</title>
+  </head>
+  <body class="bg-[#323232]">
+    <div
+      class="w-96 h-64 bg-[#ddd0c8] rounded-lg text-[#323232] flex flex-col items-center justify-center mx-auto mt-20 p-4"
+    >
+      <h2>Sign Up</h2>
+      <form action="/signup" method="post">
+        <input type="text" name="username" placeholder="Username" required />
+        <input
+          type="password"
+          name="password"
+          placeholder="Password"
+          required
+        />
+        <input class="cursor-pointer" type="submit" value="Sign up" />
+      </form>
+    </div>
+  </body>
+</html>
