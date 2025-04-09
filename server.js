@@ -145,6 +145,10 @@ app.post("/signup", async (req, res) => {
     return res.status(400).json({ error: result.error.errors });
   }
   try {
+    const dup_user = await User.findOne({ username: username });
+    if(dup_user){
+      return res.status(409).json({ message: "User already exists.Try log in!" });
+    }
     const user = new User({
       username: username,
       password: password,
