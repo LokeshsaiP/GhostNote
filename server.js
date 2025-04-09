@@ -25,8 +25,8 @@ const userSchema = zod.object({
     .min(3, "Username must be at least 3 characters long")
     .max(30, "Username must be at most 30 characters long")
     .regex(
-      /^[a-zA-Z0-9_.-]+$/,
-      "Username can only contain letters, numbers, _, ., and -"
+      /^[a-zA-Z0-9_.@-]+$/,
+      "Username can only contain letters, numbers, _, .,@ and -"
     ),
 
   password: zod
