@@ -6,29 +6,45 @@
     <script src="https://cdn.jsdelivr.net/npm/@tailwindcss/browser@4"></script>
     <title>Login</title>
   </head>
-  <body class="bg-[#323232]">
-    <div
-      class="w-96 h-64 bg-[#ddd0c8] rounded-lg text-[#323232] flex flex-col items-center justify-center mx-auto mt-20 p-4"
-    >
-      <h2>Log In</h2>
-      <form action="/login" method="post">
-        <input
-          type="text"
-          name="username"
-          placeholder="Username"
-          required
-        /><br />
-        <input
-          type="password"
-          name="password"
-          placeholder="Password"
-          required
-        /><br />
-        <input class="cursor-pointer" type="submit" value="Login" /><br />
+  <body class="bg-[#323232] min-h-screen flex items-center justify-center px-4">
+    <div class="w-full max-w-md bg-[#ddd0c8] rounded-xl shadow-lg p-8">
+      <h2 class="text-2xl font-bold mb-6 text-center text-[#323232]">Log In</h2>
+      <form action="/login" method="post" class="space-y-4">
+        <div>
+          <label for="username" class="block mb-1 text-sm font-medium"
+            >Username</label
+          >
+          <input
+            type="text"
+            id="username"
+            name="username"
+            placeholder="Enter your username"
+            required
+            class="w-full px-4 py-2 border border-gray-300 rounded-md focus:outline-none focus:ring-2 focus:ring-[#323232]"
+          />
+        </div>
+        <div>
+          <label for="password" class="block mb-1 text-sm font-medium"
+            >Password</label
+          >
+          <input
+            type="password"
+            id="password"
+            name="password"
+            placeholder="Enter your password"
+            required
+            class="w-full px-4 py-2 border border-gray-300 rounded-md focus:outline-none focus:ring-2 focus:ring-[#323232]"
+          />
+        </div>
+        <div>
+          <input
+            type="submit"
+            value="Sign Up"
+            class="w-full bg-[#323232] text-white py-2 px-4 rounded-md hover:bg-[#1f1f1f] cursor-pointer transition mb-2"
+          />
+        </div>
       </form>
       <a href="/signup">Don't have an account?SignUP</a>
     </div>
   </body>
 </html>
-<!-- #ddd0c8 light
-#323232 dark -->
