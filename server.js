@@ -146,8 +146,8 @@ app.post("/signup", async (req, res) => {
   }
   try {
     const dup_user = await User.findOne({ username: username });
-    if(dup_user){
-      return res.status(409).json({ message: "User already exists.Try log in!" });
+    if (dup_user) {
+      return res.status(409).json({ message: "User already exists!" });
     }
     const user = new User({
       username: username,
@@ -199,5 +199,5 @@ app.post("/login", async (req, res) => {
 });
 
 app.listen(PORT, "0.0.0.0", () => {
-  console.log("Server running on all interfaces");
+  console.log(`Server running on http://192.168.29.11:${PORT}`);
 });
