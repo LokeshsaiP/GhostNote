@@ -36,6 +36,9 @@
             class="w-full px-4 py-2 border border-gray-300 rounded-md focus:outline-none focus:ring-2 focus:ring-[#323232]"
           />
         </div>
+        <% if(locals.error){ %>
+        <p id="passwordError" class="text-sm text-red-600 mt-1"><%= error %></p>
+        <% } %>
         <div>
           <input
             type="submit"
