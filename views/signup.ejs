@@ -33,10 +33,24 @@
             type="password"
             id="password"
             name="password"
-            placeholder="Enter your password"
+            placeholder="Create a password"
             required
             class="w-full px-4 py-2 border border-gray-300 rounded-md focus:outline-none focus:ring-2 focus:ring-[#323232]"
           />
+        </div>
+        <div>
+          <label for="password" class="block mb-1 text-sm font-medium"
+            >Confirm Password</label
+          >
+          <input
+            type="password"
+            id="confirmPassword"
+            name="confirmPassword"
+            placeholder="Confirm your password"
+            required
+            class="w-full px-4 py-2 border border-gray-300 rounded-md focus:outline-none focus:ring-2 focus:ring-[#323232]"
+          />
+          <p id="passwordError" class="text-sm text-red-600 mt-1"></p>
         </div>
         <div>
           <input
@@ -47,5 +61,23 @@
         </div>
       </form>
     </div>
+    <script>
+      document
+        .querySelector("form")
+        .addEventListener("submit", function (event) {
+          const password = document.getElementById("password");
+          const confirmPassword = document.getElementById("confirmPassword");
+          const errorText = document.getElementById("passwordError");
+
+          if (password.value !== confirmPassword.value) {
+            event.preventDefault();
+            errorText.textContent = "Passwords do not match.";
+            confirmPassword.value = "";
+            confirmPassword.classList.add("border-red-500");
+            document.getElementById("confirmPassword").focus();
+          }
+        });
+    </script>
   </body>
 </html>
+
