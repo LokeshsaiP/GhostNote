@@ -21,7 +21,7 @@ GhostNote is a lightweight and secure web application that allows users to send 
 
 1. **Clone the repository:**
    ```bash
-   git clone https://github.com/your-username/ghostnote.git
+   git clone https://github.com/Starboyx07/GhostNote.git
    cd ghostnote
 2. **obtain node modules:**
    ```bash
