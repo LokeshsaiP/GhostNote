@@ -131,7 +131,7 @@ app.get("/login", (req, res) => {
 });
 
 app.get("/signup", (req, res) => {
-  res.render("signup");
+  res.render("signup", { error: null });
 });
 
 app.post("/signup", async (req, res) => {
@@ -147,7 +147,7 @@ app.post("/signup", async (req, res) => {
   try {
     const dup_user = await User.findOne({ username: username });
     if (dup_user) {
-      return res.status(409).json({ message: "User already exists!" });
+      return res.render("signup", { error: "Username already exists" });
     }
     const user = new User({
       username: username,
@@ -180,10 +180,10 @@ app.post("/login", async (req, res) => {
   try {
     const user = await User.findOne({ username: username });
     if (!user) {
-      return res.status(401).json({ error: "Invalid username or password" });
+      return res.render("login", { error: "Invalid username or password" });
     }
     if (user.password !== password) {
-      return res.status(401).json({ error: "Invalid username or password" });
+      return res.render("login", { error: "Invalid username or password" });
     }
     const token = jwt.sign(
       { id: user._id, username: user.username },
