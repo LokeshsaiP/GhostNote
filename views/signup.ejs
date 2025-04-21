@@ -21,6 +21,7 @@
             id="username"
             name="username"
             placeholder="Enter your username"
+            value="<%= typeof username !== 'undefined' ? username : '' %>"
             required
             class="w-full px-4 py-2 border border-gray-300 rounded-md focus:outline-none focus:ring-2 focus:ring-[#323232]"
           />
@@ -34,6 +35,7 @@
             id="password"
             name="password"
             placeholder="Create a password"
+            value="<%= typeof password !== 'undefined' ? password : '' %>"
             required
             class="w-full px-4 py-2 border border-gray-300 rounded-md focus:outline-none focus:ring-2 focus:ring-[#323232]"
           />
@@ -47,6 +49,7 @@
             id="confirmPassword"
             name="confirmPassword"
             placeholder="Confirm your password"
+            value=""
             required
             class="w-full px-4 py-2 border border-gray-300 rounded-md focus:outline-none focus:ring-2 focus:ring-[#323232]"
           />
@@ -63,21 +66,5 @@
         </div>
       </form>
     </div>
-    <script>
-      document
-        .querySelector("form")
-        .addEventListener("submit", function (event) {
-          const password = document.getElementById("password");
-          const confirmPassword = document.getElementById("confirmPassword");
-          const errorText = document.getElementById("passwordError");
-          if (password.value !== confirmPassword.value) {
-            event.preventDefault();
-            errorText.textContent = "Passwords do not match.";
-            confirmPassword.value = "";
-            confirmPassword.classList.add("border-red-500");
-            document.getElementById("confirmPassword").focus();
-          }
-        });
-    </script>
   </body>
 </html>
