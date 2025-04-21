@@ -40,6 +40,7 @@ const userSchema = zod.object({
     ),
 });
 
+//encrypt function
 function encrypt(text) {
   const algorithm = "aes-256-cbc";
   const key = crypto.randomBytes(32);
@@ -75,7 +76,7 @@ app.get("/", (req, res) => {
 app.post("/encrypt", authenticateJWT, async (req, res) => {
   const { secret } = req.body;
   if (!secret || secret.trim() === "") {
-    return res.status(400).json({ error: "Secret cannot be empty" });
+    return res.render("home", { error: "secret cannot be empty" });
   }
 
   try {
@@ -104,7 +105,7 @@ app.get("/secret/:id", async (req, res) => {
   try {
     const secret = await Secret.findById(id);
     if (!secret || secret.viewed || secret.expiresAt < new Date()) {
-      return res.status(404).send("This secret is no longer available.");
+      return res.render("secret");
     }
 
     const [encryptedData, ivHex, keyHex] = secret.encryptedSecret.split(":");
@@ -117,11 +118,10 @@ app.get("/secret/:id", async (req, res) => {
     let decrypted = decipher.update(encryptedData, "hex", "utf-8");
     decrypted += decipher.final("utf-8");
 
-    // Mark as viewed
     secret.viewed = true;
     await secret.save();
 
-    res.render("secret", { secret: decrypted }); // Create `view-secret.ejs`
+    res.render("secret", { secret: decrypted });
   } catch (err) {
     console.error(err);
     res.status(500).send("Internal server error.");
