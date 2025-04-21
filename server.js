@@ -140,21 +140,15 @@ app.post("/signup", async (req, res) => {
   const { username, password, confirmPassword } = req.body;
 
   try {
-    // Check if username already exists FIRST
     const dup_user = await User.findOne({ username: username });
     if (dup_user) {
       return res.render("signup", { error: "Username already exists" });
     }
-
-    // Validate with Zod schema
     const result = userSchema.safeParse({ username, password });
     if (!result.success) {
-      // Extract first validation error from Zod
       const firstError = result.error.errors[0].message;
       return res.render("signup", { error: firstError, username });
     }
-
-    // Password confirmation check (if confirmPassword is sent from form)
     if (password !== confirmPassword) {
       return res.render("signup", {
         error: "Passwords do not match",
@@ -162,8 +156,6 @@ app.post("/signup", async (req, res) => {
         password,
       });
     }
-
-    // If everything is good, create the user
     const user = new User({ username, password });
     await user.save();
 
