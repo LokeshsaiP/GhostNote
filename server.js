@@ -183,7 +183,8 @@ app.post("/login", async (req, res) => {
     password: password,
   });
   if (!result.success) {
-    return res.status(400).json({ error: result.error.errors });
+    const firstError = result.error.errors[0].message;
+    return res.render("login", { error: firstError });
   }
   try {
     const user = await User.findOne({ username: username });
