@@ -131,7 +131,7 @@ app.get("/login", (req, res) => {
 });
 
 app.get("/signup", (req, res) => {
-  res.render("signup", { error: null });
+  res.render("signup");
 });
 
 app.post("/signup", async (req, res) => {
