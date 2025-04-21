@@ -25,8 +25,10 @@ const userSchema = zod.object({
     .min(3, "Username must be at least 3 characters long")
     .max(30, "Username must be at most 30 characters long")
     .regex(
-      /^[a-zA-Z0-9_.@-]+$/,
-      "Username can only contain letters, numbers, _, .,@ and -"
+      /^(?=.*[A-Z])(?=.*[0-9])(?=.*[@_.-])[a-zA-Z0-9@_.-]+$/,
+      `Username must contain at least one uppercase letter.
+       one number.
+       And one special character (@, _, ., -).`
     ),
 
   password: zod
@@ -135,31 +137,45 @@ app.get("/signup", (req, res) => {
 });
 
 app.post("/signup", async (req, res) => {
-  const username = req.body.username;
-  const password = req.body.password;
-  const result = userSchema.safeParse({
-    username: username,
-    password: password,
-  });
-  if (!result.success) {
-    return res.status(400).json({ error: result.error.errors });
-  }
+  const { username, password, confirmPassword } = req.body;
+
   try {
+    // Check if username already exists FIRST
     const dup_user = await User.findOne({ username: username });
     if (dup_user) {
       return res.render("signup", { error: "Username already exists" });
     }
-    const user = new User({
-      username: username,
-      password: password,
-    });
+
+    // Validate with Zod schema
+    const result = userSchema.safeParse({ username, password });
+    if (!result.success) {
+      // Extract first validation error from Zod
+      const firstError = result.error.errors[0].message;
+      return res.render("signup", { error: firstError, username });
+    }
+
+    // Password confirmation check (if confirmPassword is sent from form)
+    if (password !== confirmPassword) {
+      return res.render("signup", {
+        error: "Passwords do not match",
+        username,
+        password,
+      });
+    }
+
+    // If everything is good, create the user
+    const user = new User({ username, password });
     await user.save();
+
     const token = jwt.sign(
       { id: user._id, username: user.username },
       jwt_secret,
-      { expiresIn: "1h" }
+      {
+        expiresIn: "1h",
+      }
     );
     res.cookie("token", token, { httpOnly: true });
+
     res.render("home", { user: user.username });
   } catch (error) {
     console.error(error);
