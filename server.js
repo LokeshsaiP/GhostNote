@@ -25,8 +25,10 @@ const userSchema = zod.object({
     .min(3, "Username must be at least 3 characters long")
     .max(30, "Username must be at most 30 characters long")
     .regex(
-      /^[a-zA-Z0-9_.@-]+$/,
-      "Username can only contain letters, numbers, _, .,@ and -"
+      /^(?=.*[A-Z])(?=.*[0-9])(?=.*[@_.-])[a-zA-Z0-9@_.-]+$/,
+      `Username must contain at least one uppercase letter.
+       one number.
+       And one special character (@, _, ., -).`
     ),
 
   password: zod
@@ -38,6 +40,7 @@ const userSchema = zod.object({
     ),
 });
 
+//encrypt function
 function encrypt(text) {
   const algorithm = "aes-256-cbc";
   const key = crypto.randomBytes(32);
@@ -73,7 +76,7 @@ app.get("/", (req, res) => {
 app.post("/encrypt", authenticateJWT, async (req, res) => {
   const { secret } = req.body;
   if (!secret || secret.trim() === "") {
-    return res.status(400).json({ error: "Secret cannot be empty" });
+    return res.render("home", { error: "secret cannot be empty" });
   }
 
   try {
@@ -102,7 +105,7 @@ app.get("/secret/:id", async (req, res) => {
   try {
     const secret = await Secret.findById(id);
     if (!secret || secret.viewed || secret.expiresAt < new Date()) {
-      return res.status(404).send("This secret is no longer available.");
+      return res.render("secret");
     }
 
     const [encryptedData, ivHex, keyHex] = secret.encryptedSecret.split(":");
@@ -115,11 +118,10 @@ app.get("/secret/:id", async (req, res) => {
     let decrypted = decipher.update(encryptedData, "hex", "utf-8");
     decrypted += decipher.final("utf-8");
 
-    // Mark as viewed
     secret.viewed = true;
     await secret.save();
 
-    res.render("secret", { secret: decrypted }); // Create `view-secret.ejs`
+    res.render("secret", { secret: decrypted });
   } catch (err) {
     console.error(err);
     res.status(500).send("Internal server error.");
@@ -135,31 +137,37 @@ app.get("/signup", (req, res) => {
 });
 
 app.post("/signup", async (req, res) => {
-  const username = req.body.username;
-  const password = req.body.password;
-  const result = userSchema.safeParse({
-    username: username,
-    password: password,
-  });
-  if (!result.success) {
-    return res.status(400).json({ error: result.error.errors });
-  }
+  const { username, password, confirmPassword } = req.body;
+
   try {
     const dup_user = await User.findOne({ username: username });
     if (dup_user) {
       return res.render("signup", { error: "Username already exists" });
     }
-    const user = new User({
-      username: username,
-      password: password,
-    });
+    const result = userSchema.safeParse({ username, password });
+    if (!result.success) {
+      const firstError = result.error.errors[0].message;
+      return res.render("signup", { error: firstError, username });
+    }
+    if (password !== confirmPassword) {
+      return res.render("signup", {
+        error: "Passwords do not match",
+        username,
+        password,
+      });
+    }
+    const user = new User({ username, password });
     await user.save();
+
     const token = jwt.sign(
       { id: user._id, username: user.username },
       jwt_secret,
-      { expiresIn: "1h" }
+      {
+        expiresIn: "1h",
+      }
     );
     res.cookie("token", token, { httpOnly: true });
+
     res.render("home", { user: user.username });
   } catch (error) {
     console.error(error);
@@ -175,7 +183,8 @@ app.post("/login", async (req, res) => {
     password: password,
   });
   if (!result.success) {
-    return res.status(400).json({ error: result.error.errors });
+    const firstError = result.error.errors[0].message;
+    return res.render("login", { error: firstError });
   }
   try {
     const user = await User.findOne({ username: username });

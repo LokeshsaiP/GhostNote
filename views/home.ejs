@@ -4,70 +4,61 @@
     <meta charset="UTF-8" />
     <meta name="viewport" content="width=device-width, initial-scale=1.0" />
     <script src="https://cdn.jsdelivr.net/npm/@tailwindcss/browser@4"></script>
-    <title>Main page</title>
+    <title>GhostNote</title>
   </head>
-  <body>
-    <!-- Nav bar -->
-    <div class="bg-[#ddd0c8]">
+  <body class="bg-[#323232] text-[#ddd0c8] font-sans">
+    <!-- Navbar -->
+    <header class="bg-[#ddd0c8] text-[#323232] shadow-md">
       <nav
-        class="container mx-auto px-4 py-2 flex justify-between items-center"
+        class="container mx-auto px-6 py-4 flex justify-between items-center"
       >
-        <a href="#" class="text-[#323232] text-lg font-bold">GhostNote</a>
-        <ul class="flex space-x-4">
-          <li><a href="#" class="text-[#323232] hover:text-white">Home</a></li>
-          <li><a href="#" class="text-[#323232] hover:text-white">About</a></li>
-          <li>
-            <a href="#" class="text-[#323232] hover:text-white">Services</a>
-          </li>
-          <li>
-            <a href="/login" class="text-[#323232] hover:text-white">Login</a>
-          </li>
+        <a href="#" class="text-xl font-bold tracking-wide">GhostNote</a>
+        <ul class="flex space-x-6 font-medium">
+          <li><a href="#" class="hover:text-[#1f1f1f]">Home</a></li>
+          <li><a href="#" class="hover:text-[#1f1f1f]">About</a></li>
+          <li><a href="#" class="hover:text-[#1f1f1f]">Services</a></li>
+          <li><a href="/login" class="hover:text-[#1f1f1f]">Login</a></li>
         </ul>
       </nav>
-    </div>
-    <!-- Nav bar end -->
-    <!-- Main content -->
-    <div class="container h-full bg-[#323232] mx-auto px-4 py-8">
-      <!-- Welcome  -->
-      <div class="flex flex-col justify-center items-center h-full">
-        <% if(locals.user){ %>
-        <h1 class="text-[#ddd0c8] text-3xl font-bold mb-4">
-          Welcome <%= user %>
-        </h1>
+    </header>
+
+    <!-- Main Content -->
+    <main class="container mx-auto px-6 py-12">
+      <!-- Welcome Message -->
+      <section class="text-center mb-10">
+        <% if(locals.user) { %>
+        <h1 class="text-4xl font-bold mb-2">Welcome, <%= user %> 👋</h1>
         <% } else { %>
-        <h1 class="text-[#ddd0c8] text-3xl font-bold mb-4">
-          Welcome to GhostNote
-        </h1>
+        <h1 class="text-4xl font-bold mb-2">Welcome to GhostNote</h1>
         <% } %>
-        <p class="text-[#ddd0c8] mb-4 text-center">
+        <p class="text-lg text-[#ccc]">
           Paste any secret message that you want to send.
         </p>
-        <span class="text-[#ddd0c8] italic font-bold"
-          >Keep your sensitive data secure</span
-        >
-      </div>
-      <!-- from -->
-      <div>
-        <form
-          action="/encrypt"
-          method="post"
-          class="flex flex-col items-center my-8 p-6"
-        >
+        <p class="italic font-semibold mt-1">Keep your sensitive data secure</p>
+      </section>
+
+      <!-- Secret Message Form -->
+      <section class="max-w-2xl mx-auto bg-[#3d3d3d] rounded-lg shadow-lg p-6">
+        <form action="/encrypt" method="POST" class="flex flex-col space-y-6">
+          <label for="secret" class="text-lg font-medium">Your Secret</label>
           <textarea
-            class="max-h-[400px] min-h-24 resize-none overflow-y-auto text-[#ddd0c8]"
             id="secret"
             name="secret"
-            placeholder="Enter your secret"
-          >
-          </textarea
-          ><br />
-          <input
-            class="cursor-pointer text-[#ddd0c8]"
+            rows="6"
+            placeholder="Enter your secret..."
+            class="resize-none rounded-md p-4 bg-[#2b2b2b] border border-[#555] focus:outline-none focus:ring-2 focus:ring-[#ddd0c8] text-[#ddd0c8] placeholder-[#aaa]"
+          ></textarea>
+          <p id="secretError" class="text-center text-md text-[#ddd0c8] mt-1">
+            <% if(locals.error){ %> <%= error %> <% } %>
+          </p>
+          <button
             type="submit"
-            value="Generate Link"
-          />
+            class="self-center bg-[#ddd0c8] text-[#323232] font-semibold px-6 py-2 rounded-md hover:bg-[#c9bdb3] transition-all duration-200"
+          >
+            🔐 Generate Link
+          </button>
         </form>
-      </div>
-    </div>
+      </section>
+    </main>
   </body>
 </html>
