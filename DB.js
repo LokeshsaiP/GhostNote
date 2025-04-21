@@ -8,12 +8,12 @@ const User = mongoose.model("users", {
   username: {
     type: String,
     required: true,
-    match: /^[a-zA-Z0-9_.-]+$/,
+    match: /^(?=.*[A-Z])(?=.*\d)(?=.*[_.@-])[A-Za-z\d_.@-]+$/, // Match uppercase, number, special char
   },
   password: {
     type: String,
     required: true,
-    match: /^[\w~`!@#$%^&*()\-+=|{}[\]:;"'<>,.?/]+$/,
+    match: /^[\w~`!@#$%^&*()\-+=|{}[\]:;"'<>,.?/]+$/, // Same as Zod pattern
   },
 });
 export default User;
