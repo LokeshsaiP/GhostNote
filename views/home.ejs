@@ -17,7 +17,11 @@
           <li><a href="#" class="hover:text-[#1f1f1f]">Home</a></li>
           <li><a href="#" class="hover:text-[#1f1f1f]">About</a></li>
           <li><a href="#" class="hover:text-[#1f1f1f]">Services</a></li>
-          <li><a href="/login" class="hover:text-[#1f1f1f]">Login</a></li>
+          <% if (user) { %>
+            <li><a href="/logout" class="hover:text-[#1f1f1f]">Logout</a></li>
+          <% } else { %>
+            <li><a href="/login" class="hover:text-[#1f1f1f]">Login</a></li>
+          <% } %>
         </ul>
       </nav>
     </header>
