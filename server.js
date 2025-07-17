@@ -60,17 +60,30 @@ function encrypt(text) {
 //jwt middleware
 function authenticateJWT(req, res, next) {
   const token = req.cookies.token;
-  if (!token) return res.status(401).json({ error: "Unauthorized" });
-
+  if (!token) {
+    return res.status(401).render('unauthorized');
+  }
   jwt.verify(token, jwt_secret, (err, user) => {
-    if (err) return res.status(403).json({ error: "Invalid token" });
+    if (err) {
+      return res.status(403).render('unauthorized');
+    }
     req.user = user;
     next();
   });
 }
 
 app.get("/", (req, res) => {
-  res.render("home");
+  const token = req.cookies.token;
+  let username = null;
+  if (token) {
+    try {
+      const decoded = jwt.verify(token, jwt_secret);
+      username = decoded.username;
+    } catch (err) {
+      res.clearCookie("token");
+    }
+  }
+  res.render("home", { user: username });
 });
 
 app.post("/encrypt", authenticateJWT, async (req, res) => {
@@ -207,6 +220,11 @@ app.post("/login", async (req, res) => {
   }
 });
 
+app.get("/logout", (req, res) => {
+  res.clearCookie("token");
+  res.redirect("/");
+});
+
 app.listen(PORT, "0.0.0.0", () => {
-  console.log(`Server running on http://192.168.29.11:${PORT}`);
+  console.log(`Server running on http://127.0.0.1:${PORT}`);
 });
