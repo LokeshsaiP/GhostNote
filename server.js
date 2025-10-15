@@ -14,6 +14,7 @@ const PORT = process.env.PORT;
 const jwt_secret = process.env.jwtsecret;
 
 app.use(cookieParser());
+app.use(express.static("public"));
 app.set("view engine", "ejs");
 app.set("views", "views");
 app.use(express.json());
@@ -61,11 +62,11 @@ function encrypt(text) {
 function authenticateJWT(req, res, next) {
   const token = req.cookies.token;
   if (!token) {
-    return res.status(401).render('unauthorized');
+    return res.status(401).render("unauthorized");
   }
   jwt.verify(token, jwt_secret, (err, user) => {
     if (err) {
-      return res.status(403).render('unauthorized');
+      return res.status(403).render("unauthorized");
     }
     req.user = user;
     next();
@@ -88,9 +89,6 @@ app.get("/", (req, res) => {
 
 app.post("/encrypt", authenticateJWT, async (req, res) => {
   const { secret } = req.body;
-  if (!secret || secret.trim() === "") {
-    return res.render("home", { error: "secret cannot be empty" });
-  }
 
   try {
     const { encryptedData, key, iv } = encrypt(secret);

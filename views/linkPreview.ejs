@@ -13,7 +13,7 @@
       class="bg-[#3d3d3d] p-8 rounded-xl shadow-lg max-w-lg w-full text-center"
     >
       <% if (locals.link) { %>
-      <h2 class="text-2xl font-bold mb-4">Here's your link 🔗</h2>
+      <h2 class="text-2xl font-bold mb-4">Here's your link!</h2>
 
       <!-- Display link -->
       <div
@@ -28,7 +28,7 @@
         onclick="copyToClipboard()"
         class="bg-[#ddd0c8] text-[#323232] font-semibold px-4 py-2 rounded-md hover:bg-[#c9bdb3] transition-all duration-200"
       >
-        📋 Copy Link
+        Copy Link
       </button>
 
       <!-- Note -->
@@ -37,7 +37,7 @@
         with.
       </p>
       <% } else { %>
-      <h2 class="text-xl font-bold mb-4">Sorry 😔</h2>
+      <h2 class="text-xl font-bold mb-4">Sorry!</h2>
       <p>We couldn't generate a link for you.</p>
       <% } %>
     </div>
@@ -62,12 +62,11 @@
           } else {
             copyButton.innerHTML = "❌ Failed";
             setTimeout(() => {
-              copyButton.innerHTML = "📋 Copy Link";
+              copyButton.innerHTML = "Copy Link";
             }, 2000);
           }
         }
 
-        // Use Clipboard API if available & secure
         if (navigator.clipboard && window.isSecureContext) {
           navigator.clipboard
             .writeText(linkText)
