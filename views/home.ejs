@@ -3,6 +3,11 @@
   <head>
     <meta charset="UTF-8" />
     <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+    <link
+      rel="stylesheet"
+      href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.5.0/css/all.min.css"
+    />
+
     <script src="https://cdn.jsdelivr.net/npm/@tailwindcss/browser@4"></script>
     <title>GhostNote</title>
   </head>
@@ -18,9 +23,9 @@
           <li><a href="#" class="hover:text-[#1f1f1f]">About</a></li>
           <li><a href="#" class="hover:text-[#1f1f1f]">Services</a></li>
           <% if (user) { %>
-            <li><a href="/logout" class="hover:text-[#1f1f1f]">Logout</a></li>
+          <li><a href="/logout" class="hover:text-[#1f1f1f]">Logout</a></li>
           <% } else { %>
-            <li><a href="/login" class="hover:text-[#1f1f1f]">Login</a></li>
+          <li><a href="/login" class="hover:text-[#1f1f1f]">Login</a></li>
           <% } %>
         </ul>
       </nav>
@@ -31,7 +36,7 @@
       <!-- Welcome Message -->
       <section class="text-center mb-10">
         <% if(locals.user) { %>
-        <h1 class="text-4xl font-bold mb-2">Welcome, <%= user %> 👋</h1>
+        <h1 class="text-4xl font-bold mb-2">Welcome, <%= user %></h1>
         <% } else { %>
         <h1 class="text-4xl font-bold mb-2">Welcome to GhostNote</h1>
         <% } %>
@@ -52,17 +57,34 @@
             placeholder="Enter your secret..."
             class="resize-none rounded-md p-4 bg-[#2b2b2b] border border-[#555] focus:outline-none focus:ring-2 focus:ring-[#ddd0c8] text-[#ddd0c8] placeholder-[#aaa]"
           ></textarea>
-          <p id="secretError" class="text-center text-md text-[#ddd0c8] mt-1">
-            <% if(locals.error){ %> <%= error %> <% } %>
-          </p>
+          <div>
+            <label for="passphrase" class="block mb-6">Passphrase</label>
+            <div class="relative w-full">
+              <input
+                type="password"
+                id="passphrase"
+                placeholder="Enter Passphrase"
+                class="border border-[#555] rounded-md bg-[#2b2b2b] p-4 pr-12 w-full"
+              />
+              <button
+                type="button"
+                id="togglePassphrase"
+                class="absolute right-3 top-1/2 transform -translate-y-1/2 text-gray-400"
+              >
+                <i class="fa-solid fa-eye" id="eyeIcon"></i>
+              </button>
+            </div>
+          </div>
+
           <button
             type="submit"
-            class="self-center bg-[#ddd0c8] text-[#323232] font-semibold px-6 py-2 rounded-md hover:bg-[#c9bdb3] transition-all duration-200"
+            class="self-center bg-[#ddd0c8] text-[#323232] font-semibold px-6 py-2 rounded-md hover:bg-[#c9bdb3] transition-all duration-200 disabled:cursor-not-allowed"
           >
-            🔐 Generate Link
+            Generate Link
           </button>
         </form>
       </section>
     </main>
+    <script src="/main.js"></script>
   </body>
 </html>
