@@ -88,25 +88,46 @@ app.get("/", (req, res) => {
 });
 
 app.post("/encrypt", authenticateJWT, async (req, res) => {
-  const { secret } = req.body;
-
   try {
+    const { secret, expiration, passphrase } = req.body;
+
+    if (!secret || !secret.trim()) {
+      return res.status(400).render("home", {
+        error: "Please enter a secret.",
+        user: req.user?.username || null,
+      });
+    }
+
     const { encryptedData, key, iv } = encrypt(secret);
 
-    const expirationTime = new Date(Date.now() + 10 * 60 * 1000); // 10 mins
+    const expirationMap = {
+      "1m": 1 * 60 * 1000,
+      "5m": 5 * 60 * 1000,
+      "15m": 15 * 60 * 1000,
+      "30m": 30 * 60 * 1000,
+      "1h": 60 * 60 * 1000,
+      "3h": 3 * 60 * 60 * 1000,
+      "10h": 10 * 60 * 60 * 1000,
+      "1d": 24 * 60 * 60 * 1000,
+      "7d": 7 * 24 * 60 * 60 * 1000,
+    };
+
+    const ttl = expirationMap[expiration] || 15 * 60 * 1000;
+    const expirationTime = new Date(Date.now() + ttl);
 
     const newSecret = new Secret({
       encryptedSecret: `${encryptedData}:${iv}:${key}`,
+      passphrase: passphrase && passphrase.trim() !== "" ? passphrase : null,
       expiresAt: expirationTime,
     });
 
     await newSecret.save();
 
-    const link = `${req.protocol}://${req.get("host")}/secret/${newSecret._id}`;
-    res.render("linkPreview", { link });
+    // ✅ Redirect to link preview (PRG pattern)
+    res.redirect(`/link/${newSecret._id}`);
   } catch (err) {
-    console.error(err);
-    res.status(500).json({ error: "Something went wrong" });
+    console.error("[/encrypt] ERROR:", err);
+    res.status(500).render("home", { error: "Something went wrong" });
   }
 });
 
@@ -114,12 +135,70 @@ app.get("/secret/:id", async (req, res) => {
   const { id } = req.params;
 
   try {
-    const secret = await Secret.findById(id);
-    if (!secret || secret.viewed || secret.expiresAt < new Date()) {
-      return res.render("secret");
+    const secretDoc = await Secret.findById(id);
+
+    if (!secretDoc || secretDoc.viewed || secretDoc.expiresAt < new Date()) {
+      // Secret expired or already viewed
+      return res.render("secret", { revealed: false, hasPassphrase: false });
     }
 
-    const [encryptedData, ivHex, keyHex] = secret.encryptedSecret.split(":");
+    // Determine if secret has a passphrase
+    const hasPassphrase = secretDoc.passphrase ? true : false;
+
+    // Render page without revealing the secret yet
+    res.render("secret", {
+      revealed: false,
+      hasPassphrase,
+      id: secretDoc._id,
+      error: null,
+    });
+  } catch (err) {
+    console.error(err);
+    res.status(500).send("Internal server error.");
+  }
+});
+
+app.post("/secret/:id/reveal", async (req, res) => {
+  const { id } = req.params;
+  const { passphrase } = req.body;
+
+  try {
+    const secretDoc = await Secret.findById(id);
+
+    if (!secretDoc || secretDoc.expiresAt < new Date()) {
+      // Secret expired
+      return res.render("secret", {
+        revealed: false,
+        hasPassphrase: false,
+        id,
+        error: "This secret has expired.",
+      });
+    }
+
+    if (secretDoc.viewed) {
+      // Secret already revealed
+      return res.render("secret", {
+        revealed: true,
+        secret: "This secret has already been viewed.",
+        hasPassphrase: false,
+        id,
+      });
+    }
+
+    // Check passphrase if required
+    if (secretDoc.passphrase) {
+      if (!passphrase || passphrase !== secretDoc.passphrase) {
+        return res.render("secret", {
+          revealed: false,
+          hasPassphrase: true,
+          id,
+          error: "Incorrect passphrase. Try again.",
+        });
+      }
+    }
+
+    // Decrypt the secret
+    const [encryptedData, ivHex, keyHex] = secretDoc.encryptedSecret.split(":");
     const decipher = crypto.createDecipheriv(
       "aes-256-cbc",
       Buffer.from(keyHex, "hex"),
@@ -129,14 +208,26 @@ app.get("/secret/:id", async (req, res) => {
     let decrypted = decipher.update(encryptedData, "hex", "utf-8");
     decrypted += decipher.final("utf-8");
 
-    secret.viewed = true;
-    await secret.save();
+    // Mark as viewed
+    secretDoc.viewed = true;
+    await secretDoc.save();
 
-    res.render("secret", { secret: decrypted });
+    res.render("secret", {
+      revealed: true,
+      secret: decrypted,
+      hasPassphrase: false,
+      id,
+    });
   } catch (err) {
     console.error(err);
     res.status(500).send("Internal server error.");
   }
+});
+
+app.get("/link/:id", authenticateJWT, async (req, res) => {
+  const { id } = req.params;
+  const link = `${req.protocol}://${req.get("host")}/secret/${id}`;
+  res.render("linkPreview", { link });
 });
 
 app.get("/login", (req, res) => {
