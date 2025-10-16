@@ -3,6 +3,10 @@
   <head>
     <meta charset="UTF-8" />
     <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+    <link
+      rel="stylesheet"
+      href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.5.0/css/all.min.css"
+    />
     <script src="https://cdn.jsdelivr.net/npm/@tailwindcss/browser@4"></script>
     <title>signup</title>
   </head>
@@ -23,7 +27,7 @@
             placeholder="Enter your username"
             value="<%= typeof username !== 'undefined' ? username : '' %>"
             required
-            class="w-full px-4 py-2 border border-gray-300 rounded-md focus:outline-none focus:ring-2 focus:ring-[#323232]"
+            class="w-full px-4 py-2 border-1 border-black rounded-md ring-1"
           />
         </div>
         <div>
@@ -37,8 +41,15 @@
             placeholder="Create a password"
             value="<%= typeof password !== 'undefined' ? password : '' %>"
             required
-            class="w-full px-4 py-2 border border-gray-300 rounded-md focus:outline-none focus:ring-2 focus:ring-[#323232]"
+            class="w-full px-4 py-2 border-1 border-black rounded-md ring-1"
           />
+          <button
+            type="button"
+            id="togglePassphrase"
+            class="absolute right-3 top-1/2 transform -translate-y-1/2 text-gray-400"
+          >
+            <i class="fa-solid fa-eye-slash" id="eyeIcon"></i>
+          </button>
         </div>
         <div>
           <label for="password" class="block mb-1 text-sm font-medium"
@@ -51,7 +62,7 @@
             placeholder="Confirm your password"
             value=""
             required
-            class="w-full px-4 py-2 border border-gray-300 rounded-md focus:outline-none focus:ring-2 focus:ring-[#323232]"
+            class="w-full px-4 py-2 border-1 border-black rounded-md ring-1"
           />
           <p id="passwordError" class="text-sm text-red-600 mt-1">
             <% if(locals.error){ %> <%= error %> <% } %>

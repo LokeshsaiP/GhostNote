@@ -53,14 +53,14 @@
         // Helper to show feedback
         function showFeedback(success) {
           if (success) {
-            copyButton.innerHTML = "✅ Copied!";
+            copyButton.innerHTML = "Copied!";
             copyButton.classList.add("bg-green-500", "text-white");
             setTimeout(() => {
-              copyButton.innerHTML = "📋 Copy Link";
+              copyButton.innerHTML = "Copy Link";
               copyButton.classList.remove("bg-green-500", "text-white");
             }, 2000);
           } else {
-            copyButton.innerHTML = "❌ Failed";
+            copyButton.innerHTML = "Failed";
             setTimeout(() => {
               copyButton.innerHTML = "Copy Link";
             }, 2000);
