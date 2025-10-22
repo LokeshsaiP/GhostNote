@@ -10,17 +10,7 @@ import {
 } from "@fortawesome/free-solid-svg-icons";
 import API from "../api";
 
-interface HomeProps {
-  user?: string | null;
-  setUser?: (username: string | null) => void; // function to update user after login/logout
-}
-
-interface EncryptResponse {
-  link: string;
-  message?: string;
-}
-
-const Home: React.FC<HomeProps> = ({ user, setUser }) => {
+const Home = ({ user, setUser }) => {
   const [secret, setSecret] = useState("");
   const [passphrase, setPassphrase] = useState("");
   const [expiration, setExpiration] = useState("15m");
@@ -29,12 +19,12 @@ const Home: React.FC<HomeProps> = ({ user, setUser }) => {
 
   const navigate = useNavigate();
 
-  const handleSubmit = async (e: React.FormEvent) => {
+  const handleSubmit = async (e) => {
     e.preventDefault();
     setLoading(true);
 
     try {
-      const res = await API.post<EncryptResponse>("/encrypt", {
+      const res = await API.post("/encrypt", {
         secret,
         passphrase,
         expiration,
@@ -46,9 +36,8 @@ const Home: React.FC<HomeProps> = ({ user, setUser }) => {
         const frontendLink = `${window.location.origin}/secret/${secretId}`;
         navigate("/LinkPreview", { state: { link: frontendLink } });
       }
-    } catch (err: unknown) {
+    } catch (err) {
       if (axios.isAxiosError(err)) {
-        // 👇 check for 401 and redirect
         if (err.response?.status === 401) {
           navigate("/unauthorized");
           return;
@@ -65,14 +54,13 @@ const Home: React.FC<HomeProps> = ({ user, setUser }) => {
   const handleLogout = async () => {
     try {
       await API.post("/logout", {}, { withCredentials: true });
-      setUser?.(null); // safe call
+      setUser?.(null);
     } catch (err) {
       console.error("Logout failed:", err);
     }
   };
   return (
     <div className="bg-[#323232] text-[#ddd0c8] font-sans min-h-screen">
-      {/* Navbar */}
       <header className="bg-[#ddd0c8] text-[#323232] shadow-md">
         <nav className="container mx-auto px-6 py-4 flex justify-between items-center">
           <Link to="/" className="text-xl font-bold tracking-wide">
@@ -112,9 +100,7 @@ const Home: React.FC<HomeProps> = ({ user, setUser }) => {
         </nav>
       </header>
 
-      {/* Main Content */}
       <main className="container mx-auto px-6 py-12">
-        {/* Welcome Message */}
         <section className="text-center mb-10">
           {user ? (
             <h1 className="text-4xl font-bold mb-2">Welcome, {user}</h1>
@@ -129,7 +115,6 @@ const Home: React.FC<HomeProps> = ({ user, setUser }) => {
           </p>
         </section>
 
-        {/* Secret Message Form */}
         <section className="max-w-2xl mx-auto bg-[#3d3d3d] rounded-lg shadow-lg p-6">
           <form onSubmit={handleSubmit} className="flex flex-col space-y-6">
             <label htmlFor="secret" className="text-lg font-medium">

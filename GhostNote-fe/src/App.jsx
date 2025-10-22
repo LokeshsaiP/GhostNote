@@ -9,15 +9,13 @@ import Unauthorized from "./components/Unauthorized";
 import API from "./api";
 
 function App() {
-  const [user, setUser] = useState<string | null>(null);
+  const [user, setUser] = useState(null);
 
-  // Optionally fetch the current user on app load
   useEffect(() => {
     const fetchUser = async () => {
       try {
-        const res = await API.get("/me"); // assuming /me returns { username }
-        if (res.data?.username) setUser(res.data.username);
-        // eslint-disable-next-line @typescript-eslint/no-unused-vars
+        const res = await API.get("/me");
+        if (res.data.username) setUser(res.data.username);
       } catch (error) {
         setUser(null);
       }

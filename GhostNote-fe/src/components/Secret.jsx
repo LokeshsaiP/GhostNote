@@ -1,17 +1,17 @@
-import React, { useState } from "react";
+import { useState } from "react";
 import { useParams, useNavigate } from "react-router-dom";
 import API from "../api";
 import axios from "axios";
 
-const Secret: React.FC = () => {
-  const { id } = useParams<{ id: string }>();
+const Secret = () => {
+  const { id } = useParams();
   const navigate = useNavigate();
   const [passphrase, setPassphrase] = useState("");
-  const [revealedSecret, setRevealedSecret] = useState<string | null>(null);
-  const [localError, setLocalError] = useState<string | null>(null);
+  const [revealedSecret, setRevealedSecret] = useState(null);
+  const [localError, setLocalError] = useState(null);
   const [loading, setLoading] = useState(false);
 
-  const handleSubmit = async (e: React.FormEvent) => {
+  const handleSubmit = async (e) => {
     e.preventDefault();
     if (!id) return setLocalError("Invalid secret ID");
 
@@ -20,15 +20,12 @@ const Secret: React.FC = () => {
       const { data } = await API.post(`/secret/${id}/reveal`, { passphrase });
       setRevealedSecret(data.secret);
       setLocalError(null);
-    } catch (err: unknown) {
+    } catch (err) {
       if (axios.isAxiosError(err)) {
-        // ✅ If unauthorized, navigate to the Unauthorized page
         if (err.response?.status === 401) {
           navigate("/unauthorized");
           return;
         }
-
-        // Otherwise, show local error
         setLocalError(err.response?.data?.error || err.message);
       } else if (err instanceof Error) {
         setLocalError(err.message);
@@ -42,7 +39,6 @@ const Secret: React.FC = () => {
 
   return (
     <div className="bg-[#323232] text-[#ddd0c8] min-h-screen flex flex-col">
-      {/* Navbar */}
       <header className="bg-[#ddd0c8] text-[#323232]">
         <nav className="container mx-auto px-6 py-4 flex justify-between items-center">
           <a href="/" className="text-xl font-bold">
@@ -54,7 +50,6 @@ const Secret: React.FC = () => {
         </nav>
       </header>
 
-      {/* Main Content */}
       <main className="flex-grow container mx-auto px-6 py-12 flex items-center justify-center">
         <div className="bg-[#3d3d3d] p-8 rounded-xl shadow-lg max-w-lg w-full text-center">
           {revealedSecret ? (

@@ -1,12 +1,10 @@
-import React from "react";
 import { Link } from "react-router-dom";
 import { FontAwesomeIcon } from "@fortawesome/react-fontawesome";
 import { faGhost } from "@fortawesome/free-solid-svg-icons";
 
-const Unauthorized: React.FC = () => {
+const Unauthorized = () => {
   return (
     <div className="bg-[#323232] text-[#ddd0c8] font-sans min-h-screen flex flex-col">
-      {/* Navbar */}
       <header className="bg-[#ddd0c8] text-[#323232] shadow-md">
         <nav className="container mx-auto px-6 py-4 flex justify-between items-center">
           <Link to="/" className="text-xl font-bold tracking-wide">
@@ -37,8 +35,6 @@ const Unauthorized: React.FC = () => {
           </ul>
         </nav>
       </header>
-
-      {/* Unauthorized Content */}
       <main className="flex-grow flex items-center justify-center px-6">
         <div className="bg-[#3d3d3d] max-w-lg w-full rounded-lg shadow-lg p-8 text-center">
           <h1 className="text-4xl font-bold text-[#ff6b6b] mb-4">

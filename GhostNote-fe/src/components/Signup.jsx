@@ -1,28 +1,21 @@
-import React, { useState, type FormEvent } from "react";
+import { useState } from "react";
 import API from "../api";
 import { useNavigate } from "react-router-dom";
 
-interface SignupProps {
-  setUser: (username: string | null) => void; // receive setter from App
-  initialUsername?: string;
-  initialPassword?: string;
-  initialError?: string;
-}
-
-const Signup: React.FC<SignupProps> = ({
+const Signup = ({
   setUser,
   initialUsername = "",
   initialPassword = "",
   initialError = "",
 }) => {
-  const [username, setUsername] = useState<string>(initialUsername);
-  const [password, setPassword] = useState<string>(initialPassword);
-  const [confirmPassword, setConfirmPassword] = useState<string>("");
-  const [error, setError] = useState<string>(initialError);
-  const [loading, setLoading] = useState<boolean>(false);
+  const [username, setUsername] = useState(initialUsername);
+  const [password, setPassword] = useState(initialPassword);
+  const [confirmPassword, setConfirmPassword] = useState("");
+  const [error, setError] = useState(initialError);
+  const [loading, setLoading] = useState(false);
   const navigate = useNavigate();
 
-  const handleSubmit = async (e: FormEvent<HTMLFormElement>) => {
+  const handleSubmit = async (e) => {
     e.preventDefault();
     setError("");
 
@@ -36,8 +29,8 @@ const Signup: React.FC<SignupProps> = ({
       const response = await API.post("/signup", { username, password });
 
       if (response.data.success && response.data.username) {
-        setUser(response.data.username); // update global user state
-        navigate("/"); // redirect to home SPA-style
+        setUser(response.data.username);
+        navigate("/");
       } else {
         setError(response.data.error || "Signup failed");
       }

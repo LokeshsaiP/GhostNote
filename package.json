@@ -14,9 +14,7 @@
   "main": "index.js",
   "type": "module",
   "scripts": {
-    "dev": "nodemon --watch '*.ts' --exec 'ts-node-esm server.ts'",
-    "start": "node dist/server.js",
-    "build": "tsc"
+    "dev": "nodemon server.js'"
   },
   "keywords": [],
   "author": "",
