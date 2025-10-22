@@ -1,22 +1,14 @@
-import mongoose, { Document, Schema, Model } from "mongoose";
+import mongoose, { Schema, Model } from "mongoose";
 import dotenv from "dotenv";
 
 dotenv.config();
 
-// Connect to MongoDB
 mongoose
-  .connect(process.env.dbURL as string)
+  .connect(process.env.dbURL)
   .then(() => console.log("✅ Connected to MongoDB"))
   .catch((err) => console.error("❌ MongoDB connection error:", err));
 
-// Define the interface for a User document
-export interface IUser extends Document {
-  username: string;
-  password: string;
-}
-
-// Define schema
-const userSchema = new Schema<IUser>({
+const userSchema = new Schema({
   username: {
     type: String,
     required: true,
@@ -35,7 +27,6 @@ const userSchema = new Schema<IUser>({
   },
 });
 
-// Create model
-const User: Model<IUser> = mongoose.model<IUser>("User", userSchema);
+const User = mongoose.model("User", userSchema);
 
 export default User;

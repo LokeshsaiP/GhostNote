@@ -1,36 +1,25 @@
-import React, { useState, type FormEvent } from "react";
+import { useState } from "react";
 import API from "../api";
 import axios from "axios";
 import { useNavigate } from "react-router-dom";
 import { FontAwesomeIcon } from "@fortawesome/react-fontawesome";
 import { faEye, faEyeSlash } from "@fortawesome/free-solid-svg-icons";
 
-interface LoginProps {
-  setUser: (username: string | null) => void; // receive setter from App
-  initialError?: string | null;
-}
-
-interface LoginResponse {
-  success?: boolean;
-  username?: string;
-  error?: string;
-}
-
-const Login: React.FC<LoginProps> = ({ setUser, initialError }) => {
+const Login = ({ setUser, initialError }) => {
   const [username, setUsername] = useState("");
   const [password, setPassword] = useState("");
-  const [showPass, setShowPass] = useState(false); // toggle password visibility
+  const [showPass, setShowPass] = useState(false);
   const [error, setError] = useState(initialError || "");
   const [loading, setLoading] = useState(false);
   const navigate = useNavigate();
 
-  const handleSubmit = async (e: FormEvent) => {
+  const handleSubmit = async (e) => {
     e.preventDefault();
     setLoading(true);
     setError("");
 
     try {
-      const response = await API.post<LoginResponse>(
+      const response = await API.post(
         "/login",
         { username, password },
         { withCredentials: true }
@@ -40,12 +29,12 @@ const Login: React.FC<LoginProps> = ({ setUser, initialError }) => {
         setError(response.data.error);
       } else if (response.data.success && response.data.username) {
         setUser(response.data.username);
-        navigate("/"); // SPA redirect
+        navigate("/");
       }
-    } catch (err: unknown) {
+    } catch (err) {
       if (axios.isAxiosError(err)) {
         const message =
-          (err.response?.data as { error?: string })?.error ||
+          (err.response?.data && err.response.data.error) ||
           err.message ||
           "An error occurred during login.";
         setError(message);
@@ -66,7 +55,6 @@ const Login: React.FC<LoginProps> = ({ setUser, initialError }) => {
           Log In
         </h2>
 
-        {/* Dummy credentials info */}
         <div className="bg-[#f2f2f2] text-[#323232] p-4 rounded-md mb-6 text-sm border border-gray-300">
           <p className="font-semibold mb-1">Use this credential to log in:</p>
           <p>
@@ -78,7 +66,6 @@ const Login: React.FC<LoginProps> = ({ setUser, initialError }) => {
         </div>
 
         <form onSubmit={handleSubmit} className="space-y-4">
-          {/* Username */}
           <div>
             <label
               htmlFor="username"
@@ -97,7 +84,6 @@ const Login: React.FC<LoginProps> = ({ setUser, initialError }) => {
             />
           </div>
 
-          {/* Password */}
           <div>
             <label
               htmlFor="password"

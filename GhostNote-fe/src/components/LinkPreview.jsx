@@ -1,22 +1,15 @@
-import React, { useState, useEffect } from "react";
+import { useState, useEffect } from "react";
 import { useLocation, useNavigate } from "react-router-dom";
 
-interface LocationState {
-  link?: string;
-}
-
-const LinkPreview: React.FC = () => {
+const LinkPreview = () => {
   const location = useLocation();
   const navigate = useNavigate();
-  const state = location.state as LocationState | undefined;
-  const [link, setLink] = useState<string | null>(null);
-  const [copyStatus, setCopyStatus] = useState<
-    "Copy Link" | "Copied!" | "Failed"
-  >("Copy Link");
+  const state = location.state;
+  const [link, setLink] = useState(null);
+  const [copyStatus, setCopyStatus] = useState("Copy Link");
 
   useEffect(() => {
     if (!state?.link) {
-      // If no link in state, redirect to home
       navigate("/");
     } else {
       setLink(state.link);
