@@ -86,6 +86,20 @@ app.get("/", (_req, res) => {
   res.json({ message: "Welcome to GhostNote API" });
 });
 
+app.get("/me", authenticateJWT, async (req, res) => {
+  try {
+    const user = await User.findById(req.user.id).select("username");
+    if (!user) {
+      return res.status(404).json({ error: "User not found" });
+    }
+
+    res.json({ username: user.username });
+  } catch (err) {
+    console.error(err);
+    res.status(500).json({ error: "Internal server error" });
+  }
+});
+
 app.post("/encrypt", authenticateJWT, async (req, res) => {
   try {
     const { secret, expiration, passphrase } = req.body;
@@ -143,7 +157,7 @@ app.post("/secret/:id/reveal", async (req, res) => {
     }
 
     if (secretDoc.passphrase && secretDoc.passphrase !== passphrase) {
-      return res.status(401).json({ error: "Incorrect passphrase" });
+      return res.status(400).json({ error: "Incorrect passphrase" });
     }
 
     const [encryptedData, ivHex, keyHex] = secretDoc.encryptedSecret.split(":");
