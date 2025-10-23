@@ -182,6 +182,8 @@ app.post("/secret/:id/reveal", async (req, res) => {
 
 app.post("/signup", async (req, res) => {
   const { username, password, confirmPassword } = req.body;
+  const isProduction = process.env.NODE_ENV === "production";
+
   try {
     const existing = await User.findOne({ username });
     if (existing)
@@ -204,7 +206,11 @@ app.post("/signup", async (req, res) => {
       jwt_secret,
       { expiresIn: "1h" }
     );
-    res.cookie("token", token, { httpOnly: true });
+    res.cookie("token", token, {
+      httpOnly: true,
+      secure: isProduction,
+      sameSite: isProduction ? "None" : "Lax",
+    });
     res.json({ success: true, username: user.username });
   } catch (err) {
     console.error(err);
@@ -214,6 +220,7 @@ app.post("/signup", async (req, res) => {
 
 app.post("/login", async (req, res) => {
   const { username, password } = req.body;
+  const isProduction = process.env.NODE_ENV === "production";
 
   try {
     const user = await User.findOne({ username });
@@ -226,7 +233,11 @@ app.post("/login", async (req, res) => {
       jwt_secret,
       { expiresIn: "1h" }
     );
-    res.cookie("token", token, { httpOnly: true });
+    res.cookie("token", token, {
+      httpOnly: true,
+      secure: isProduction,
+      sameSite: isProduction ? "None" : "Lax",
+    });
     res.json({ success: true, username: user.username });
   } catch (err) {
     console.error(err);
