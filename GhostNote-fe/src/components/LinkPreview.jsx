@@ -6,6 +6,7 @@ const LinkPreview = () => {
   const navigate = useNavigate();
   const state = location.state;
   const [link, setLink] = useState(null);
+  const [fileName, setFileName] = useState(null);
   const [copyStatus, setCopyStatus] = useState("Copy Link");
 
   useEffect(() => {
@@ -13,6 +14,7 @@ const LinkPreview = () => {
       navigate("/");
     } else {
       setLink(state.link);
+      setFileName(state.fileName || null);
     }
   }, [state, navigate]);
 
@@ -53,7 +55,12 @@ const LinkPreview = () => {
       <div className="bg-[#3d3d3d] p-8 rounded-xl shadow-lg max-w-lg w-full text-center">
         {link ? (
           <>
-            <h2 className="text-2xl font-bold mb-4">Here's your link!</h2>
+            <h2 className="text-2xl font-bold mb-4">
+              {fileName ? "Your file has been shared!" : "Here's your link!"}
+            </h2>
+            {fileName && (
+              <p className="text-lg text-[#ddd0c8] mb-2">File: {fileName}</p>
+            )}
             <div className="bg-[#2b2b2b] p-4 rounded-md mb-4 break-all border border-[#555]">
               <span className="text-[#ddd0c8]">{link}</span>
             </div>
