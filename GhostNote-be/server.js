@@ -7,12 +7,15 @@ import jwt from "jsonwebtoken";
 import cookieParser from "cookie-parser";
 import crypto from "crypto";
 import cors from "cors";
+import multer from "multer";
+import { v4 as uuidv4 } from "uuid";
 
 dotenv.config();
 
 const app = express();
 const PORT = parseInt(process.env.PORT || "3000", 10);
 const jwt_secret = process.env.jwtsecret || "";
+const file_upload_path = process.env.FILE_UPLOAD_PATH || "./uploads";
 const allowedOrigins = [
   "http://localhost:5173",
   "https://ghost-note-fe-six.vercel.app",
@@ -34,6 +37,18 @@ app.use(
 app.use(cookieParser());
 app.use(express.json());
 app.use(express.urlencoded({ extended: false }));
+
+const storage = multer.diskStorage({
+  destination: (req, file, cb) => {
+    cb(null, file_upload_path);
+  },
+  filename: (req, file, cb) => {
+    const ext = file.originalname.split(".").pop();
+    cb(null, `${uuidv4()}.${ext}`);
+  },
+});
+
+const upload = multer({ storage: storage });
 
 const userSchema = zod.object({
   username: zod
@@ -86,14 +101,53 @@ app.get("/", (_req, res) => {
   res.json({ message: "Welcome to GhostNote API" });
 });
 
+app.get("/me", authenticateJWT, async (req, res) => {
+  try {
+    const user = await User.findById(req.user.id).select("username");
+    if (!user) {
+      return res.status(404).json({ error: "User not found" });
+    }
+
+    res.json({ username: user.username });
+  } catch (err) {
+    console.error(err);
+    res.status(500).json({ error: "Internal server error" });
+  }
+});
+
+app.use("/uploads", express.static(file_upload_path));
+
+app.post("/upload", authenticateJWT, upload.single("file"), (req, res) => {
+  try {
+    if (!req.file) {
+      return res.status(400).json({ error: "No file uploaded" });
+    }
+    res.json({
+      success: true,
+      fileUrl: `/uploads/${req.file.filename}`,
+      fileName: req.file.originalname,
+      fileType: req.file.mimetype,
+    });
+  } catch (err) {
+    console.error(err);
+    res.status(500).json({ error: "File upload failed" });
+  }
+});
+
 app.post("/encrypt", authenticateJWT, async (req, res) => {
   try {
-    const { secret, expiration, passphrase } = req.body;
+    const { secret, expiration, passphrase, fileUrl, fileName, fileType } =
+      req.body;
 
-    if (!secret || !secret.trim())
-      return res.status(400).json({ error: "Secret is required" });
+    if (!secret && !fileUrl) {
+      return res.status(400).json({ error: "Secret or file is required" });
+    }
 
-    const { encryptedData, key, iv } = encrypt(secret);
+    let encryptedData = null;
+    if (secret) {
+      const { encryptedData: encData, key, iv } = encrypt(secret);
+      encryptedData = `${encData}:${iv}:${key}`;
+    }
 
     const expirationMap = {
       "1m": 1 * 60 * 1000,
@@ -111,7 +165,10 @@ app.post("/encrypt", authenticateJWT, async (req, res) => {
     const expirationTime = new Date(Date.now() + ttl);
 
     const newSecret = new Secret({
-      encryptedSecret: `${encryptedData}:${iv}:${key}`,
+      encryptedSecret: encryptedData,
+      fileUrl: fileUrl || null,
+      fileName: fileName || null,
+      fileType: fileType || null,
       passphrase: passphrase?.trim() || null,
       expiresAt: expirationTime,
     });
@@ -146,20 +203,34 @@ app.post("/secret/:id/reveal", async (req, res) => {
       return res.status(401).json({ error: "Incorrect passphrase" });
     }
 
-    const [encryptedData, ivHex, keyHex] = secretDoc.encryptedSecret.split(":");
-    const decipher = crypto.createDecipheriv(
-      "aes-256-cbc",
-      Buffer.from(keyHex, "hex"),
-      Buffer.from(ivHex, "hex")
-    );
+    if (secretDoc.fileUrl) {
+      // If it's a file secret, return the file URL and metadata
+      secretDoc.viewed = true;
+      await secretDoc.save();
+      return res.json({
+        fileUrl: secretDoc.fileUrl,
+        fileName: secretDoc.fileName,
+        fileType: secretDoc.fileType,
+      });
+    } else if (secretDoc.encryptedSecret) {
+      // If it's a text secret, decrypt and return the text
+      const [encryptedData, ivHex, keyHex] =
+        secretDoc.encryptedSecret.split(":");
+      const decipher = crypto.createDecipheriv(
+        "aes-256-cbc",
+        Buffer.from(keyHex, "hex"),
+        Buffer.from(ivHex, "hex")
+      );
 
-    let decrypted = decipher.update(encryptedData, "hex", "utf-8");
-    decrypted += decipher.final("utf-8");
+      let decrypted = decipher.update(encryptedData, "hex", "utf-8");
+      decrypted += decipher.final("utf-8");
 
-    secretDoc.viewed = true;
-    await secretDoc.save();
-
-    res.json({ secret: decrypted });
+      secretDoc.viewed = true;
+      await secretDoc.save();
+      return res.json({ secret: decrypted });
+    } else {
+      return res.status(404).json({ error: "Secret content not found" });
+    }
   } catch (err) {
     console.error(err);
     res.status(500).json({ error: "Internal server error" });
@@ -168,6 +239,8 @@ app.post("/secret/:id/reveal", async (req, res) => {
 
 app.post("/signup", async (req, res) => {
   const { username, password, confirmPassword } = req.body;
+  const isProduction = process.env.NODE_ENV === "production";
+
   try {
     const existing = await User.findOne({ username });
     if (existing)
@@ -190,7 +263,11 @@ app.post("/signup", async (req, res) => {
       jwt_secret,
       { expiresIn: "1h" }
     );
-    res.cookie("token", token, { httpOnly: true });
+    res.cookie("token", token, {
+      httpOnly: true,
+      secure: isProduction,
+      sameSite: isProduction ? "None" : "Lax",
+    });
     res.json({ success: true, username: user.username });
   } catch (err) {
     console.error(err);
@@ -200,6 +277,7 @@ app.post("/signup", async (req, res) => {
 
 app.post("/login", async (req, res) => {
   const { username, password } = req.body;
+  const isProduction = process.env.NODE_ENV === "production";
 
   try {
     const user = await User.findOne({ username });
@@ -212,7 +290,11 @@ app.post("/login", async (req, res) => {
       jwt_secret,
       { expiresIn: "1h" }
     );
-    res.cookie("token", token, { httpOnly: true });
+    res.cookie("token", token, {
+      httpOnly: true,
+      secure: isProduction,
+      sameSite: isProduction ? "None" : "Lax",
+    });
     res.json({ success: true, username: user.username });
   } catch (err) {
     console.error(err);
