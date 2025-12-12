@@ -200,7 +200,7 @@ app.post("/secret/:id/reveal", async (req, res) => {
     }
 
     if (secretDoc.passphrase && secretDoc.passphrase !== passphrase) {
-      return res.status(401).json({ error: "Incorrect passphrase" });
+      return res.status(400).json({ error: "Incorrect passphrase" });
     }
 
     if (secretDoc.fileUrl) {

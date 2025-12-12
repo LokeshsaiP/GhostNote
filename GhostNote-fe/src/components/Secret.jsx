@@ -28,17 +28,11 @@ const Secret = () => {
       }
       setLocalError(null);
     } catch (err) {
-      if (axios.isAxiosError(err)) {
-        if (err.response?.status === 401) {
-          navigate("/unauthorized");
-          return;
-        }
-        setLocalError(err.response?.data?.error || err.message);
-      } else if (err instanceof Error) {
-        setLocalError(err.message);
-      } else {
-        setLocalError("Unexpected error occurred");
+      if (err.response && err.response.status === 401) {
+        navigate("/unauthorized");
+        return;
       }
+      setLocalError(err.response?.data?.error || err.message || "Unexpected error occurred");
     } finally {
       setLoading(false);
     }
