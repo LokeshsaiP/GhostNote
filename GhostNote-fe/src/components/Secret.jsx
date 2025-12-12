@@ -8,6 +8,7 @@ const Secret = () => {
   const navigate = useNavigate();
   const [passphrase, setPassphrase] = useState("");
   const [revealedSecret, setRevealedSecret] = useState(null);
+  const [fileData, setFileData] = useState(null); // New state for file data
   const [localError, setLocalError] = useState(null);
   const [loading, setLoading] = useState(false);
 
@@ -18,7 +19,13 @@ const Secret = () => {
     setLoading(true);
     try {
       const { data } = await API.post(`/secret/${id}/reveal`, { passphrase });
-      setRevealedSecret(data.secret);
+      if (data.fileUrl) {
+        setFileData({ fileUrl: data.fileUrl, fileName: data.fileName, fileType: data.fileType });
+        setRevealedSecret(null); // Clear text secret if file is present
+      } else {
+        setRevealedSecret(data.secret);
+        setFileData(null); // Clear file data if text is present
+      }
       setLocalError(null);
     } catch (err) {
       if (err.response && err.response.status === 401) {
@@ -51,6 +58,30 @@ const Secret = () => {
               <h1 className="text-2xl font-bold mb-4">Your Secret</h1>
               <div className="bg-[#2b2b2b] p-6 rounded-md mb-6 break-words text-left">
                 {revealedSecret}
+              </div>
+            </>
+          ) : fileData ? (
+            <>
+              <h1 className="text-2xl font-bold mb-4">Your Shared File</h1>
+              <div className="bg-[#2b2b2b] p-6 rounded-md mb-6 text-center">
+                {fileData.fileType && fileData.fileType.startsWith("image/") ? (
+                  <img
+                    src={`${API.defaults.baseURL}${fileData.fileUrl}`}
+                    alt={fileData.fileName}
+                    className="max-w-full h-auto mx-auto rounded-md"
+                  />
+                ) : (
+                  <p>
+                    <a
+                      href={`${API.defaults.baseURL}${fileData.fileUrl}`}
+                      target="_blank"
+                      rel="noopener noreferrer"
+                      className="text-[#ddd0c8] underline hover:text-[#c9bdb3]"
+                    >
+                      Download {fileData.fileName || "File"}
+                    </a>
+                  </p>
+                )}
               </div>
             </>
           ) : (

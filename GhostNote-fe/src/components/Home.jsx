@@ -16,25 +16,62 @@ const Home = ({ user, setUser }) => {
   const [expiration, setExpiration] = useState("15m");
   const [showPass, setShowPass] = useState(false);
   const [loading, setLoading] = useState(false);
+  const [file, setFile] = useState(null);
+  const [filePreview, setFilePreview] = useState(null);
 
   const navigate = useNavigate();
+
+  const handleFileChange = (e) => {
+    const selectedFile = e.target.files[0];
+    if (selectedFile) {
+      setFile(selectedFile);
+      setSecret(""); // Clear secret if file is selected
+      // Set filePreview to a truthy value to ensure filename is always shown
+      setFilePreview(true);
+    } else {
+      setFile(null);
+      setFilePreview(null);
+    }
+  };
 
   const handleSubmit = async (e) => {
     e.preventDefault();
     setLoading(true);
 
     try {
+      let fileUrl = null;
+      let fileName = null;
+      let fileType = null;
+
+      if (file) {
+        const formData = new FormData();
+        formData.append("file", file);
+        const uploadRes = await API.post("/upload", formData, {
+          headers: {
+            "Content-Type": "multipart/form-data",
+          },
+        });
+        fileUrl = uploadRes.data.fileUrl;
+        fileName = uploadRes.data.fileName;
+        fileType = uploadRes.data.fileType;
+      }
+
       const res = await API.post("/encrypt", {
         secret,
         passphrase,
         expiration,
+        fileUrl,
+        fileName,
+        fileType,
       });
       const backendLink = res.data.link;
       const secretId = backendLink.split("/").pop();
 
       if (secretId) {
         const frontendLink = `${window.location.origin}/secret/${secretId}`;
-        navigate("/LinkPreview", { state: { link: frontendLink } });
+        navigate("/LinkPreview", {
+          state: { link: frontendLink, fileName: fileName },
+        });
       }
     } catch (err) {
       if (axios.isAxiosError(err)) {
@@ -125,9 +162,61 @@ const Home = ({ user, setUser }) => {
               rows={6}
               placeholder="Enter your secret..."
               value={secret}
-              onChange={(e) => setSecret(e.target.value)}
+              onChange={(e) => {
+                setSecret(e.target.value);
+                setFile(null);
+                setFilePreview(null);
+              }}
               className="resize-none rounded-md p-4 bg-[#2b2b2b] border border-[#555] focus:outline-none focus:ring-2 focus:ring-[#ddd0c8] text-[#ddd0c8] placeholder-[#aaa]"
+              disabled={!!file}
             />
+
+            <div className="flex items-center justify-center w-full py-4">
+              <span className="text-lg font-medium">OR</span>
+            </div>
+
+            <label
+              htmlFor="file-upload"
+              className="flex flex-col items-center justify-center w-full h-32 border-2 border-dashed border-[#555] rounded-lg cursor-pointer bg-[#2b2b2b] hover:bg-[#3d3d3d] transition-all duration-200"
+            >
+              {filePreview ? (
+                <p className="text-lg text-[#ddd0c8]">
+                  File Selected: {file?.name}
+                </p>
+              ) : (
+                <div className="flex flex-col items-center justify-center pt-5 pb-6">
+                  <svg
+                    className="w-8 h-8 mb-4 text-[#ddd0c8]"
+                    aria-hidden="true"
+                    xmlns="http://www.w3.org/2000/svg"
+                    fill="none"
+                    viewBox="0 0 20 16"
+                  >
+                    <path
+                      stroke="currentColor"
+                      strokeLinecap="round"
+                      strokeLinejoin="round"
+                      strokeWidth="2"
+                      d="M13 13h3a3 3 0 0 0 0-6h-.025A5.56 5.56 0 0 0 16 6.5 5.5 5.5 0 0 0 5.207 5.021C5.137 5.017 5.071 5 5 5a4 4 0 0 0 0 8h2.167M10 15V6m0 0L7 9m3-3 3 3"
+                    />
+                  </svg>
+                  <p className="mb-2 text-sm text-[#ddd0c8]">
+                    <span className="font-semibold">Click to upload</span> or
+                    drag and drop
+                  </p>
+                  <p className="text-xs text-[#aaa]">
+                    PNG, JPG, GIF or any file type
+                  </p>
+                </div>
+              )}
+
+              <input
+                id="file-upload"
+                type="file"
+                className="hidden"
+                onChange={handleFileChange}
+              />
+            </label>
 
             <div>
               <label htmlFor="passphrase" className="block mb-6 text-lg">
@@ -184,7 +273,7 @@ const Home = ({ user, setUser }) => {
 
             <button
               type="submit"
-              disabled={secret.trim() === "" || loading}
+              disabled={(!secret.trim() && !file) || loading}
               className="self-center bg-[#ddd0c8] text-[#323232] font-semibold px-6 py-2 rounded-md hover:bg-[#c9bdb3] transition-all duration-200 disabled:cursor-not-allowed"
             >
               {loading ? "Generating..." : "Generate Link"}
